@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:gfe="http://www.springframework.org/schema/gemfire"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:util="http://www.springframework.org/schema/util" xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/gemfire http://www.springframework.org/schema/gemfire/spring-gemfire-1.1.xsd
+        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+
+    <!-- primarily used to spin up a demo database to show how cache loading, writing and initialization might work -->
+    
+    <!-- spring config that runs the h2 database from inside a spring context simplifying management-->
+	<bean id="org.h2.tools.Server" class="org.h2.tools.Server"
+		factory-method="createTcpServer" init-method="start" destroy-method="stop">
+		<constructor-arg
+	value="-tcp,-tcpAllowOthers,true,-tcpPort,8043,-url,jdbc:h2:tcp://localhost:8043/griddb" />
+	</bean>
+	
+	<bean id="org.h2.tools.WebServer" class="org.h2.tools.Server"
+		factory-method="createWebServer" init-method="start" destroy-method="stop">
+		<constructor-arg value="-web,-webPort,8082" />
+	</bean>
+		
+</beans>

@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" 
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xmlns:gfe="http://www.springframework.org/schema/gemfire"
+        xmlns:context="http://www.springframework.org/schema/context" 
+        xmlns:util="http://www.springframework.org/schema/util" 
+        xmlns:p="http://www.springframework.org/schema/p"
+        xmlns:cache="http://www.springframework.org/schema/cache" 
+        xmlns:jaxws="http://cxf.apache.org/jaxws"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+        http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache-3.1.xsd
+        http://www.springframework.org/schema/gemfire http://www.springframework.org/schema/gemfire/spring-gemfire-1.1.xsd
+        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd
+        http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd"
+    >
+      <context:component-scan base-package="demo.vmware.command"/>
+    
+    <cache:annotation-driven />
+    
+    <!--  these are manually created and put in the list so that we can get a repeatable order -->
+    <!--  resource scanning wouldn't give us that -->
+    <!--  these settings can ballon the memory! you may have to run with -Xmx settings like -Xmx1024M -->
+    <bean id="commandCreateData" class="demo.vmware.commands.schemaspecific.CommandCreateData">
+        <!--  number of companies -->
+        <constructor-arg index="0" value="1000"/>
+        <!-- region per company -->
+        <constructor-arg index="1" value="5"/>
+        <!--  groups per region -->
+        <constructor-arg index="2" value="4"/>
+        <!--  branches per group -->
+        <constructor-arg index="3" value="20"/>
+        <!-- spring wire the templates also -->
+        <constructor-arg index="4" ref="gemTemplateAttribute"/>
+        <constructor-arg index="5" ref="gemTemplateRelationship"/>
+        <constructor-arg index="6" ref="gemTemplateContact"/>
+        <constructor-arg index="7" ref="gemTemplateActivityLegal"/>
+        <constructor-arg index="8" ref="gemTemplateTransform"/>
+    </bean>
+    <!-- use parallel loading -->
+    <bean id="commandGetAllRegions" class="demo.vmware.commands.CommandGetAllRegions">
+        <constructor-arg index="0" value="true"/>
+    </bean>  
+
+    <!--  this belongs in a different file  -->
+    <bean id="commandLoadRegionFromFile" class="demo.vmware.commands.CommandLoadRegionFromFile">
+        <constructor-arg index="0" ref="dataLoaderUtils"/>
+    </bean>
+    <bean id="commandLoadRegionFromDatabase" class="demo.vmware.commands.CommandLoadRegionFromDatabase">
+        <constructor-arg index="0" ref="dataLoaderUtils"/>
+    </bean>
+    
+    <bean id="commandLoadAllRegionsFromDatabase" class="demo.vmware.commands.CommandLoadAllRegionsFromDatabase">
+        <constructor-arg index="0" ref="dataLoaderUtils"/>
+    </bean>
+
+    <bean id="commandGetCounts" class="demo.vmware.commands.CommandGetCounts"/>
+    <bean id="commandModifyStringAttribute" class="demo.vmware.commands.CommandModifyStringAttribute"/>
+    <bean id="commandGetAllOneRegion" class="demo.vmware.commands.CommandGetOneRegion"/>
+    <bean id="commandGetOneObject" class="demo.vmware.commands.CommandGetOneObject"/>
+    <bean id="commandRebalance" class="demo.vmware.commands.CommandRebalance"/>
+    <bean id="commandPurgeAllRegions" class="demo.vmware.commands.CommandPurgeAllRegions"/>
+    <bean id="commandSetProperty" class="demo.vmware.commands.CommandSetProperty"/>
+    <bean id="commandSystemExit" class="demo.vmware.commands.CommandSystemExit"/>
+    <bean id="commandPowerOfTwo" class="demo.vmware.commands.CommandPowerOfTwo"/>
+    <!--  this lets us wrap this class in a proxy it is autowired into CommandPowerOfTwo -->
+    <bean class="demo.vmware.commands.CommandPowerOfTwoHelper"/>
+
+    <!--  manually build the list so we can control the display order -->
+    <bean id="defaultCommandProcessor" class="demo.vmware.commands.CommandProcessor"> 
+        <constructor-arg>
+            <list>
+                <ref bean="commandPowerOfTwo"/>
+                <ref bean="commandGetCounts"/>
+                <ref bean="commandCreateData"/>
+                <ref bean="commandLoadRegionFromFile"/>
+                <ref bean="commandLoadRegionFromDatabase"/>
+                <ref bean="commandLoadAllRegionsFromDatabase"/>
+                <ref bean="commandModifyStringAttribute"/>
+                <ref bean="commandGetAllOneRegion"/>
+                <ref bean="commandGetAllRegions"/>
+                <ref bean="commandGetOneObject"/>
+                <ref bean="commandRebalance"/>
+                <ref bean="commandSetProperty"/>
+                <ref bean="commandPurgeAllRegions"/>
+                <ref bean="commandSystemExit"/>
+            </list>
+            </constructor-arg>
+        </bean>
+
+    
+</beans>
+    

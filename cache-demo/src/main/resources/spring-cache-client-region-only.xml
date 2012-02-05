@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" 
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xmlns:gfe="http://www.springframework.org/schema/gemfire"
+        xmlns:context="http://www.springframework.org/schema/context" 
+        xmlns:util="http://www.springframework.org/schema/util" 
+        xmlns:p="http://www.springframework.org/schema/p"
+        xmlns:cache="http://www.springframework.org/schema/cache" 
+        xmlns:jaxws="http://cxf.apache.org/jaxws"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+        http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache-3.1.xsd
+        http://www.springframework.org/schema/gemfire http://www.springframework.org/schema/gemfire/spring-gemfire-1.1.xsd
+        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd
+        http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd"
+    >
+
+    <!--  this contains the region definitions for the client.  It relies on spring-cache-client-core.xml to funciton -->
+
+    <!--  demo cache listener so we can log to see how it works at the debug level -->
+    <bean id="dummy-cache-listener-logger" class="demo.vmware.datasync.DummyCacheServerListener" />
+
+    <!-- GEMFIRE REGION DEFINITIONS - similar to that in spring-cache-server -->
+    <!--  demonstrates the us of optional listeners avaialble on the client side -->   
+    <gfe:client-region id="ATTRIBUTE" pool-name="client" cache-ref="cache" >
+        <gfe:cache-listener ref="dummy-cache-listener-logger" />
+    </gfe:client-region>
+    <gfe:client-region id="TRANSFORM" pool-name="client" cache-ref="cache" >    
+         <gfe:cache-listener ref="dummy-cache-listener-logger" />
+    </gfe:client-region>
+    <gfe:client-region id="RELATIONSHIP" pool-name="client" cache-ref="cache" >
+         <gfe:cache-listener ref="dummy-cache-listener-logger" />
+    </gfe:client-region>
+    <gfe:client-region id="CONTACT" pool-name="client" cache-ref="cache" >
+         <gfe:cache-listener ref="dummy-cache-listener-logger" />
+    </gfe:client-region>
+    <gfe:client-region id="ACTIVITYLEGAL" pool-name="client" cache-ref="cache" >
+         <gfe:cache-listener ref="dummy-cache-listener-logger" />
+    </gfe:client-region>
+    <!-- holds the @Cacheable stored values for CommandPowerOfTwo(Helper) -->
+    <gfe:client-region id="POWERTABLE" pool-name="client" cache-ref="cache" >
+         <gfe:cache-listener ref="dummy-cache-listener-logger" />
+    </gfe:client-region>
+    <!-- holds the cache properties / meta-data to support enable/disbable custom code -->
+        <gfe:client-region id="PROPERTIES" pool-name="client" cache-ref="cache" >
+    </gfe:client-region>
+
+    <!--  support for the spring cache abstracton in the server when running server side code -->
+    <!--  this file dependent on the gemfire cache being spring wired using spring-gemfire -->
+    <bean id="cacheManager"
+        class="org.springframework.data.gemfire.support.GemfireCacheManager" p:cache-ref="cache"/>
+   
+       <!--  could skip this definition if we added path to resource scan and then auto-injected -->
+    <bean id="cacheBasedPropertiesBinder" class="demo.vmware.util.CacheBasedPropertiesBinder">
+        <property name="propertiesRegion" ref="PROPERTIES"/>
+    </bean>
+   
+</beans>

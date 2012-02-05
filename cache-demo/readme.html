@@ -1,0 +1,168 @@
+<html>
+<head>
+<title>Gemfire Example README</title>
+</head>
+<body>
+<h1>Functionality</h1>
+This is a very basic demo of some of VMWare's Gemfire product.  
+It is demonstrable as both standalone components and as deployable war files.  
+The following is an incomplete list of demonstrated components.
+<ul>
+<li><b>Cache nodes</b> A standalone server or clustered server that includes listeners and continuous queries </li>
+<li><b>replicated regions</b> regions where the data is replicated across all nodes</li>
+<li><b>Cache client</b> A standalone client program that has local cache</li>
+<li><b>Continuous Query Clients</b> A standalone client program that receives call backs when data changes in certain regions</li>
+<li><b>Cache Listener</b> A component that runs in the server that logs listener events</li>
+<li><b>Cache Loader</b> Two examples, one that just logs when there is a cache miss and the other that is configured to load cache misses form the demo H2 database.</li>
+<li><b>Cache Writer (write-through)</b> Two examples, one that just logs when data changes in the cache and can be written some backend system. The other is configured to write to a DB when data is saved.</li>
+<li><b>Locator</b> A locator process that shows how the ports are selected</li>
+<li><b>JmxAgent</b> A JMXAgent wrapper that lets it be run in the same way as the other components.</li>
+<li><b>Disk persistence(?)</b> this may belong in a different section</li>
+<li><b>The @ cacheable annotation</b> One of the commands and regions is dedicated the @cacheable annotation. See the "power" command</li>
+<li><b></b> </li>
+</ul>
+<p>
+Some things that are not yet in the demonstration
+<ul>
+<li><b>WAN Gateway</b> TBA</li>
+<li><b>Write-behind</b> This is built on top of WAN gateway</li>
+<li><b>Write-through</b> The demonstration includes logging write-through. It will eventually have fully functional write-through </li>
+<li><b>Partitioned regions</b> This requires that users run at least two nodes to be useful.</li>
+<li><b>Co-located data</b> This is whose node location is picked based on its relationship to other data.  All regions are currently fully replicated without any partioning </li>
+<li><b>Security hooks</b> TBA</li>
+<li><b>Data morphing based on permissions</b> This is dependent on identity management.</li>
+<li><b>Properties/meta-data region</b> An example of how gemfire can use gemfire itself to store cluster behavior information for java proceedures or listeners.</li>
+<li><b></b> </li>
+</ul>
+<h1>Demonstration Components</h1>
+<p>
+<h2>Shell</h2>
+The demo has a lightweight menu system available on stdin/stdout/log4j when running as standalone applications. The commands are available in client or server processes. 
+The idea here is that we wanted a simple way to muck around with Gemfire features without building your own application. 
+This list may not be accurate.  See the menu for the current list.
+That command line lets you do the following functions:  
+<ul>
+<li>Generate 2^n as a demo of @Cacheable.  Calculates 2^n and caches. Uses the cache version if you repeat teh same number more than once  <br>Usage: &lt;cmd&gt; &lt;n&gt;
+<li>Return Cache sizes for all regions. Clients with local caches return the local cache size   <br>Usage: &lt;cmd&gt;
+<li>Create random data and stuff into Gemfire Cluster. This creates 400,000 rows in all tables    <br>Usage: &lt;cmd&gt;
+<li>Load a region from a CSV file (absolute or relative to project root).   <br> Usage: &lt;cmd&gt; &lt;region_name&gt; &lt;csv_file_name&gt;
+<li>Load data from DB pre-defined automapping assumes 1-1 mapping. Uses the Spring batch auto-binding layer    <br>Usage: &lt;cmd&gt; &lt;region_name&gt; 
+<li>Load all possible regions from data from DB pre-defined automapping assumes 1-1 mapping. Runs one thread per region  <br>Usage: &lt;cmd&gt; 
+<li>Modify a string attribute. Retrieves the object from the cache and changes its value.  <br> Usage: &lt;cmd&gt; &lt;region_name&gt; &lt;pk&gt; &lt;property_name&gt; &lt;attribute_name&gt;
+<li>Retrieve entire <i>cacheName</i> and show the first <rowCount> entries (requires template). Calls toString()   <br> Usage: &lt;cmd&gt; &lt;cacheName&gt; &lt;showRowCount&gt;
+<li>Retrieve all data in all Regions. Does not display. May run parallel fetch, one per region (uses templates)   <br> Usage: &lt;cmd&gt;
+<li>Retrieve from <i>cacheName</i> the object specified by key <i>key</i>   <br> Usage: &lt;cmd&gt; &lt;cache_name&gt; &lt;key&gt;
+<li>Rebalance cache. Only works on data/server node    Usage: &lt;cmd&gt;
+<li>Set a property in the property region. Ex 'cacheWriterEnable|cacheLoaderEnable' 'true|false'.  Useful for testing properties.    <br>Usage: &lt;cmd&gt; &lt;property-name&gt; &lt;new-value&gt;
+<li>Purge all data from cache: WARNING!    <br>Usage: &lt;cmd&gt;
+<li>Exit this program without hesitation. Terminates command line programs   <br> Usage: &lt;cmd&gt;
+</ul>
+<h2>Components</h2>
+<p>
+The system is broken up into several components that exist as main() programs that can be run from inside Eclipse with <i>RunAs-->JavaApplication</i>.  
+Some of these can be run as standalone java programs with their own bootstrap. The java application class files containing the main() entry point 
+exist in demo.vmware.app to make it easier to explore.
+These programs are all in the src/main/java/demo/vmware/app folder.
+<ul>
+<li><b>DB.java</b> This is a demonstration database that can be used to test bulk loading and cache-loader code when there is a cache miss.
+Run this first if you have any of the loaders and listeners enabled.
+<li><b>Locator.java</b> Run this to start your Gemfire locator that is required before any client or server can startup. 
+This code supports an arbitrary number of locators per machine but is currently configured for 2 through spring wiring.
+<li><b>Server.java</b> Run this to start a Gemfire server process. You can run multiple copies of this on the same machine.
+The caches are configured through spring so you can convert the regions from simple replicated to partitioned though those files. 
+The demo command menu is available in this process type.
+<li><b>JmxAgent.</b> GFMon, the Gemfire monitoring tool, communicates with a cluster via JMX.This program starts the gemfire/jmx bridge.  Run this agent before running gfmon. 
+<li><b>Client.</b> Clients can be standalone or caching clients.  This is a caching client that runs the same command menu as the server.
+Clients should be launched after all the server and services components have been started.
+<li><b>ClientCq</b> This is a standalone non-caching client that registers a continuous query for data changes of a certain type.
+Clients should be launched after all the server and services components have been started.
+</ul> 
+
+Server, Client, Locator and JmxAgent can also be run inside container using the separate war files defined in src/main/resources. 
+The WAR files are built as part of the standard maven build.
+
+<H2>Execution Sequence</H2>
+
+<ol>
+<li>Run <i>mvn clean install</i> to pull down all the dependencies and to build the class files and war packages
+<li>Start the H2 database using DB.java.  This is optional if you disable or remove the database connected cache loaders.
+<li>Connect to H2 on http://localhost:8082 and use the default login and password This can be done from inside Eclipse
+<li>Paste the contents of src/test/resources/sql/create-tables.sql into the H2 command window and execute it. 
+This creates the schema and loads a couple rows of test data. You could add 100s or 1000s of rows in the sql file to increase the DB size
+<li>Start the locator using Locator.java. This can be done from inside Eclipse.
+<li>Start the server using Server.java This can be done from inside Eclipse.
+<li>You run more than one server. Load will be distributed across them via the locators.
+<li>Verify the size of each cache using the command console.  One of the commands prints the region sizes.
+<li>Request an object in one of the regions by key after looking at the keys currently available in H2. 
+The cache loader will fetch teh one row in.
+<li>Load all of the tables from the database using the command console
+<li>Verify the size of each cache.
+<li>Look at the server logs to see what is going on. Logging levels are set in log4j.properties.
+<li>Load some data from a csv using the command console.  The path is relative to the eclipse project root so it wold be src/test/resources/datafiles.
+The filenames are not exactly the same as the region names so pay attention to that when entering the command. 
+Logging level changes require a restart to be picked up.
+<li>You can create a 2 million record cache through auto-generate command in the command console.
+<li>Start a client
+<li>You can pull down the 2 million rows down to the client via the command menu. It runs one thread per region about 13 seconds on a 2011 macbook.
+<li>Pull down the content of one of the regions using the command console and have it print a couple objects using the command options.
+<li>Start a continuous query (cq) client.  
+<li>Modify one of the objects that is being monitored by the cq client and you should see it log the fact that it got a callback.
+</ol>
+
+The cache listener and partitioning behavior can be changed via the files in the src/main/resources directory.  
+You can leave the locator and datbase running across Server and Client restarts.
+
+<H1>Demonstration data</H1>
+
+<h2>Gemfire Regions</h2>
+The gemfire regions exist to demonstrate a couple different ideas and capabilities.
+<ul>
+<li>Data Model Regions
+    <ul>
+    These were created for a specific demonstration and have self and cross reference joins that make them less than ideal candidates for partitioning.  
+    Most data models have good breakpoints for partitioning. These regions are replicated across all nodes.
+    All of the data loading and creation happens in these regions. These are the regions we created GemfireTemplates for.
+    <li>ATTRIBUTE</li>
+    <li>RELATIONSHIP</li>
+    <li>ACTIVITYLEGAL</li>
+    <li>CONTACT</li>
+    <li>TRANSFORM.</li>
+    </ul>
+</li>
+<li>Properties regions.
+    <ul>
+    These regions act as meta-data for some of cluster-side custom code.  This lets us create state that can turn on and off
+    features in our custom code. They can also be used for applicaton wide properties that might otherwise be pushed to 
+    mulitple file systems or an RDB.
+    <li>PROPERTIES</li>
+    </ul>
+</li>
+<li>"Cache-able" regions.
+    <ul>
+    This codebase demonstrates how to use the @Cacheable annotation and how it can be used with gemfire to manage objects.
+    This is a very easy way to push objects into and out of a cache without knowing the cache exists. All ther
+    uses of the cache in this codebase "know" about the cache. 
+    The example is very simple only using a single region. Applications could share types of objects in a single region
+    or they could have one region per object type for these caches.
+    <li>POWERTABLE</li>
+    </ul>
+</li>  
+<li>Regions for future demonstrations.
+    <ul>
+    Other regions exist in the config to show alternate cache configurations including disk-persistent or partitioned regions.
+    <li>NOTES</li>
+    </ul>
+</li>  
+</ul>
+
+<h2>Data Model</h2>
+Data model objects exist for the Data Model Regions. They all have single attribute keys.  
+This isn't a requirement but simplifies the demonstration.
+<p>
+Arbitrary, not necessarily uniform, or primitive data is stored in the other regions.
+
+<h2>Auto-mapping data and file interaction</h2>
+To be written
+
+</body>
+</html>

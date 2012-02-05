@@ -1,0 +1,15 @@
+<!DOCTYPE client-cache PUBLIC 
+"-//GemStone Systems, Inc.//GemFire Declarative Caching 6.6//EN" 
+"http://www.gemstone.com/dtd/cache6_6.dtd">
+<client-cache>
+
+   <pdx read-serialized="true">
+		<pdx-serializer>
+			<class-name>com.gemstone.gemfire.pdx.ReflectionBasedAutoSerializer</class-name>
+			<parameter name="classes">
+				<string>demo\.vmware\.domain\..*</string>
+			</parameter>
+		</pdx-serializer>
+	</pdx>
+
+</client-cache>

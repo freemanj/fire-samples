@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" 
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xmlns:gfe="http://www.springframework.org/schema/gemfire"
+        xmlns:context="http://www.springframework.org/schema/context" 
+        xmlns:util="http://www.springframework.org/schema/util" 
+        xmlns:p="http://www.springframework.org/schema/p"
+        xmlns:cache="http://www.springframework.org/schema/cache" 
+        xmlns:jaxws="http://cxf.apache.org/jaxws"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+        http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache-3.1.xsd
+        http://www.springframework.org/schema/gemfire http://www.springframework.org/schema/gemfire/spring-gemfire-1.1.xsd
+        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd
+        http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd"
+    >
+
+    <!-- context file for process that spins up a gemfire locator service inside a spring context based app
+         locator services must be started before data nodes can come up.
+         -->
+    <context:property-placeholder system-properties-mode="OVERRIDE" location="classpath:/common.properties" />
+
+    <!-- create a unique directory base directory for this node -->
+    <bean id="findDiskDir" class="demo.vmware.util.PersistenceDirectoryGenerator" destroy-method="unlock" 
+            init-method="findDirectory">
+        <property name="parent" value="${data.location}/locator" />
+    </bean>
+
+    <!-- runs a locator. supports multiple locators on a single host -->
+    <bean id="locator" class="demo.vmware.util.LocatorBean" init-method="startLocator" destroy-method="stopLocator">
+        <property name="locatorPorts" value="${locator.port1},${locator.port2}" />
+        <property name="throwOnBindFailure" value="false" />
+        <property name="state" value="#{findDiskDir.getSelected()}/locator.state" />
+        <property name="log" value="#{findDiskDir.getSelected()}/locator.log" />
+        <property name="locators" value="${locator.host1}[${locator.port1}],${locator.host2}[${locator.port2}]"/>
+    </bean>
+</beans>

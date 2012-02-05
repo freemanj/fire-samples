@@ -1,0 +1,1 @@
+These are sample CSV files that can be loaded into the cache by the command processor. See CommandLoadRegionFromFile.

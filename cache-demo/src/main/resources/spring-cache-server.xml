@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" 
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xmlns:gfe="http://www.springframework.org/schema/gemfire"
+        xmlns:context="http://www.springframework.org/schema/context" 
+        xmlns:util="http://www.springframework.org/schema/util" 
+        xmlns:p="http://www.springframework.org/schema/p"
+        xmlns:cache="http://www.springframework.org/schema/cache" 
+        xmlns:jaxws="http://cxf.apache.org/jaxws"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+        http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache-3.1.xsd
+        http://www.springframework.org/schema/gemfire http://www.springframework.org/schema/gemfire/spring-gemfire-1.1.xsd
+        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd
+        http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd"
+    >
+
+    
+    <!--  if we package scan then we can autowire things like the CacheLoader -->
+    <!--  <context:component-scan base-package="demo.vmware.datasync"/> -->
+    
+
+    <!-- Generic properties that we can set, such as where to store data and log files -->
+    <context:property-placeholder system-properties-mode="OVERRIDE" location="classpath:/common.properties" />
+
+    <!-- gemfire.properties file for the cache server -->
+    <!-- combine the server properties with the locator settings we use everywhere else -->
+    <bean id="props" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+        <property name="locations">
+            <list>
+                <value>classpath:gemfire-server.properties</value>
+            </list>
+        </property>
+        <property name="properties">
+            <value>locators=${locator.host1}[${locator.port1}],${locator.host2}[${locator.port2}]</value>
+        </property>
+    </bean>
+
+    <!-- when we run multiple cache servers on the same node, we need unique server ports -->
+    <bean id="portGenerator" class="demo.vmware.util.ServerPortGenerator" />
+
+    <!-- create a unique directory base directory for this node -->
+    <bean id="findDiskDir" class="demo.vmware.util.PersistenceDirectoryGenerator" destroy-method="unlock" init-method="findDirectory">
+        <property name="parent" value="${data.location}" />
+    </bean>
+
+    <!--  this bean lets us use one of the regions as a meta-data or properties store. It provides static api to properties -->
+    <!--  could skip this definition if we added path to resource scan and then auto-injected -->
+    <bean id="cacheBasedPropertiesBinder" class="demo.vmware.util.CacheBasedPropertiesBinder">
+        <property name="propertiesRegion" ref="PROPERTIES"/>
+    </bean>
+    
+    <!--  demo cache listener so we can log to see how it works at the debug level -->
+	<bean id="dummy-cache-listener-logger" class="demo.vmware.datasync.DummyCacheServerListener">
+    </bean>
+    <!-- called for write-through. --> 
+    <!--  demo cache writer that just logs so we can see how it works at the debug level -->
+    <bean id="dummy-cache-writer" class="demo.vmware.datasync.DummyCacheWriter" >
+        <property name="propertiesBinder" ref="cacheBasedPropertiesBinder"/>
+    </bean>
+    <!--  Not implemented: Do not use yet. demo cache writer that saves newly inserted objects to the database -->
+    <bean id="automapped-cache-writer" class="demo.vmware.datasync.CacheWriterAutoMapped" >
+        <property name="propertiesBinder" ref="cacheBasedPropertiesBinder"/>
+        <property name="dataSource" ref="dataSource"/>
+        <property name="dataLoaderUtilities" ref="dataLoaderUtils"/>
+    </bean>
+    <!--  cache writer that logs whenever there is a cache miss on get() call.  Demonstrates lazy-loading hook -->
+    <bean id="dummy-cache-loader" class="demo.vmware.datasync.DummyCacheLoader" >
+        <property name="propertiesBinder" ref="cacheBasedPropertiesBinder"/>
+    </bean>
+    <!--  demo loader that uses auto-mapping to load objects from cache on miss
+          real app would use a different loader for each region -->
+    <bean id="automapped-cache-loader" class="demo.vmware.datasync.CacheLoaderAutoMapped" >
+        <property name="propertiesBinder" ref="cacheBasedPropertiesBinder"/>
+        <property name="dataLoaderUtilities" ref="dataLoaderUtils"/>
+    </bean>
+	
+    <!-- gemfire base cache configuration where we inject properties created above -->
+    <gfe:cache id="cache" properties-ref="props" cache-xml-location="classpath:cache-server.xml" />
+
+    <!-- this makes the cache server be a 'server' in the grid -->
+    <gfe:cache-server id="advanced-config" auto-startup="true" cache-ref="cache" port="#{portGenerator.generatePort()}" />
+
+    <!-- location for persistent backing store/overflow -->
+    <bean id="diskStore" class="demo.vmware.util.GemfireDiskStore" init-method="init">
+        <property name="cache" ref="cache" />
+        <property name="baseDir" value="#{findDiskDir.getSelected()}" />
+        <property name="diskStoreName" value="default" />
+    </bean>
+
+    <!-- this is a future for gateway support. gateway is not functional in this demo. 
+         WAN gateway also used for write-behind support  
+         -->
+    <bean id="gatewayQueueAttributes" class="com.gemstone.gemfire.cache.util.GatewayQueueAttributes">
+        <property name="diskStoreName" value="#{diskStore.getStore().getName()}" />
+        <property name="enablePersistence" value="false" />
+        <property name="batchSize" value="1000" />
+        <property name="maximumQueueMemory" value="32" />
+    </bean>
+
+
+
+    <!-- GEMFIRE REGION DEFINITIONS - Similar that that in spring-cache-client
+         should declare loaders, listeners or writers only if you actually need them. They have a cost.
+         note: listeners must be declared before loaders and writers 
+         
+         cache-listener: 
+         cache-loader: called when there is a cache miss on a get() call
+         cache-writer: when a put() is called that needs to get written out somewhere like the DB
+         -->
+    
+    <gfe:replicated-region id="ATTRIBUTE" name="ATTRIBUTE" cache-ref="cache">
+        <gfe:cache-listener ref="dummy-cache-listener-logger" />
+        <gfe:cache-loader   ref="automapped-cache-loader"/>
+        <gfe:cache-writer   ref="dummy-cache-writer"/>
+    </gfe:replicated-region>
+    
+    <gfe:replicated-region id="RELATIONSHIP"  name="RELATIONSHIP" cache-ref="cache">
+        <gfe:cache-listener ref="dummy-cache-listener-logger" />
+        <gfe:cache-loader   ref="automapped-cache-loader"/>
+        <gfe:cache-writer   ref="dummy-cache-writer"/>
+    </gfe:replicated-region>
+    
+     <gfe:replicated-region id="TRANSFORM"  name="TRANSFORM" cache-ref="cache">
+        <gfe:cache-listener ref="dummy-cache-listener-logger" />
+        <gfe:cache-loader   ref="automapped-cache-loader"/>
+        <gfe:cache-writer   ref="dummy-cache-writer"/>
+    </gfe:replicated-region>
+    
+    <!--  contacts are tied to a single company (ATTRIBUTE) so co-locate if partitioned -->
+    <gfe:replicated-region id="CONTACT"  name="CONTACT" cache-ref="cache">
+        <gfe:cache-listener ref="dummy-cache-listener-logger" />
+        <gfe:cache-loader   ref="automapped-cache-loader"/>
+        <gfe:cache-writer   ref="dummy-cache-writer"/>
+    </gfe:replicated-region> 
+    
+    <gfe:replicated-region id="ACTIVITYLEGAL" name="ACTIVITYLEGAL" cache-ref="cache">
+        <gfe:cache-listener ref="dummy-cache-listener-logger" />
+        <gfe:cache-loader   ref="automapped-cache-loader"/>
+        <gfe:cache-writer   ref="dummy-cache-writer"/>
+    </gfe:replicated-region>
+    
+    <!-- demonstration for the cache annotation and the CommandPowerOfTwo command processor
+        uses dummy cache writer and loader 
+      -->
+    <gfe:replicated-region id="POWERTABLE" name="POWERTABLE" cache-ref="cache">
+        <gfe:cache-listener ref="dummy-cache-listener-logger" />
+        <gfe:cache-loader   ref="automapped-cache-loader"/>
+        <gfe:cache-writer   ref="dummy-cache-writer"/>
+    </gfe:replicated-region>
+
+    <!-- demonstration for the cache annotation and the CommandPowerOfTwo command processor -->
+    <gfe:replicated-region id="PROPERTIES" name="PROPERTIES" cache-ref="cache">
+    </gfe:replicated-region>
+
+    <!-- this is a demonstration region that shows how to configure disk persistence 
+         no model objects or commands work for this region at this time
+         -->
+    <gfe:replicated-region id="NOTES" name="NOTES" cache-ref="cache">
+        <gfe:disk-store queue-size="50" auto-compact="true" max-oplog-size="10" synchronous-write="false" time-interval="9999">
+            <gfe:disk-dir location="#{findDiskDir.createDirectory('activitylegal-persist')}" max-size="999" />
+        </gfe:disk-store>
+    </gfe:replicated-region>
+
+    <!-- create some indexes. 
+         The 'expression' is attribute.attribute off the root object put into the region 
+        -->
+    <gfe:index id="transform-id1"     expression="id1" from="/TRANSFORM"     type="PRIMARY_KEY" cache-ref="cache" />
+    <gfe:index id="transform-id2"     expression="id2" from="/TRANSFORM"     type="PRIMARY_KEY" cache-ref="cache" />
+    <gfe:index id="relationship-id1"  expression="id1" from="/RELATIONSHIP"  type="PRIMARY_KEY" cache-ref="cache" />
+    <gfe:index id="relationship-id2"  expression="id2" from="/RELATIONSHIP"  type="PRIMARY_KEY" cache-ref="cache" />
+    <gfe:index id="contact-id1"       expression="id1" from="/CONTACT"        type="PRIMARY_KEY" cache-ref="cache" />
+    <gfe:index id="activitylegal-id1" expression="id1" from="/ACTIVITYLEGAL" type="PRIMARY_KEY" cache-ref="cache" />
+    <gfe:index id="activitylegal-id2" expression="id2" from="/ACTIVITYLEGAL" type="PRIMARY_KEY" cache-ref="cache" />
+
+    <!--  support for the spring cache abstraction in the server when running server side code -->
+    <!--  this file dependent on the gemfire cache being spring wired using spring-gemfire -->
+    <bean id="cacheManager"
+        class="org.springframework.data.gemfire.support.GemfireCacheManager"  p:cache-ref="cache"/>
+
+</beans>

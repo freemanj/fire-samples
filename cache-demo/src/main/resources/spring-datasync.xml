@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" 
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xmlns:gfe="http://www.springframework.org/schema/gemfire"
+        xmlns:context="http://www.springframework.org/schema/context" 
+        xmlns:util="http://www.springframework.org/schema/util" 
+        xmlns:p="http://www.springframework.org/schema/p"
+        xmlns:cache="http://www.springframework.org/schema/cache" 
+        xmlns:jaxws="http://cxf.apache.org/jaxws"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+        http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache-3.1.xsd
+        http://www.springframework.org/schema/gemfire http://www.springframework.org/schema/gemfire/spring-gemfire-1.1.xsd
+        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd
+        http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd"
+    >
+
+    <!--
+        This file describes how can we interact with the database for load, write-behind land data loading.
+        The demo tries to use auto-mapping and binding so that it doesn't need as many classes or components 
+        It provides all of the auto-mapping and spring batch related functionality     
+      -->    
+
+    <!--  this belongs in a different file  -->
+    <bean class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close" id="dataSource">
+        <property name="driverClassName" value="${database.driverClassName}"/>
+        <property name="url" value="${database.url}"/>
+        <property name="username" value="${database.username}"/>
+        <property name="password" value="${database.password}"/>
+    </bean>     
+    
+    <!--  This class can populate a region from a file or database, one object per row/line. The demo only has one database.  
+          Applications could have multiple so we might have more than one declared DataLoaderUtils
+          Note that different caches can be plugged in based on whether we are client or server 
+          -->
+    <bean id="dataLoaderUtils" class="demo.vmware.util.DataLoaderUtils">
+        <!-- constructor injection is a good programming practice :-) -->
+        <constructor-arg index="0" ref="regionToPrototype"/>
+        <constructor-arg index="1" ref="cache"/>
+        <!--  this property is optional since we may not always be backed by a database. should we do constructor arg with null support? -->
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    
+    <!--  not needed in any normal gemfire application -->
+    <!--  used in the demo by flat file reader and the auto-mappers to calculate the object to be used for each region -->
+    <!--  used in the demo by the flat file and database reader and the associated auto-mappers
+            modelClass = the class we instantiate when loading from files or database
+            databaseTable = the table we load from when loading from a database
+            cacheKeyMethod = the method we call to get the value that will act as cache key for the object fetched from files or db
+     -->     
+    <util:map id="regionToPrototype">
+        <entry key="ATTRIBUTE">
+            <map>
+            <entry key="modelClass"><bean class="demo.vmware.model.Attribute"/></entry>
+            <entry key="databaseTable" value="attribute"/>
+            <entry key="cacheKeyMethod" value="getPk"/>
+            <entry key="databasePrimaryKeyField" value="pk"/>
+            </map>
+        </entry>
+        <entry key="TRANSFORM">
+            <util:map>
+            <entry key="modelClass"><bean class="demo.vmware.model.Transform"/></entry>
+            <entry key="databaseTable" value="transform"/>
+            <entry key="cacheKeyMethod" value="getPk"/>
+            <entry key="databasePrimaryKeyField" value="pk"/>
+            </util:map>
+        </entry>
+        <entry key="RELATIONSHIP">
+            <util:map>
+            <entry key="modelClass"><bean class="demo.vmware.model.Relationship"/></entry>
+            <entry key="databaseTable" value="relationship"/>
+            <entry key="cacheKeyMethod" value="getPk"/>
+            <entry key="databasePrimaryKeyField" value="pk"/>
+            </util:map>
+        </entry>
+        <entry key="CONTACT">
+            <util:map>
+            <entry key="modelClass"><bean class="demo.vmware.model.Contact"/></entry>
+            <entry key="databaseTable" value="contact"/>
+            <entry key="cacheKeyMethod" value="getPk"/>
+            <entry key="databasePrimaryKeyField" value="pk"/>
+            </util:map>
+        </entry>
+        <entry key="ACTIVITYLEGAL">
+            <util:map>
+            <entry key="modelClass"><bean class="demo.vmware.model.ActivityLegal"/></entry>
+            <entry key="databaseTable" value="activity_legal"/>
+            <entry key="cacheKeyMethod" value="getPk"/>
+            <entry key="databasePrimaryKeyField" value="pk"/>
+            </util:map>
+        </entry>
+    </util:map>
+
+    
+</beans>
+    

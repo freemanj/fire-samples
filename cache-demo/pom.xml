@@ -1,0 +1,319 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>demo.vmware</groupId>
+    <packaging>war</packaging>
+    <properties>
+        <spring.integration.version>2.1.0.RC1</spring.integration.version>
+        <cxf.version>2.5.0</cxf.version>
+    </properties>
+    <version>1.0.0</version>
+    <url>http://maven.apache.org</url>
+    <dependencies>
+        <dependency>
+            <groupId>gfmon</groupId>
+            <artifactId>commons-modeler</artifactId>
+            <version>6.6</version>
+            <type>jar</type>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>gfmon</groupId>
+            <artifactId>mail</artifactId>
+            <version>6.6</version>
+            <type>jar</type>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>gfmon</groupId>
+            <artifactId>mx4j</artifactId>
+            <version>6.6</version>
+            <type>jar</type>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>gfmon</groupId>
+            <artifactId>mx4j-tools</artifactId>
+            <version>6.6</version>
+            <type>jar</type>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>gfsh</groupId>
+            <artifactId>gfsh</artifactId>
+            <version>6.6</version>
+            <type>jar</type>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>gfsh</groupId>
+            <artifactId>jline</artifactId>
+            <version>6.6</version>
+            <type>jar</type>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-gemfire</artifactId>
+            <version>1.1.0.RELEASE</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <version>3.1.0.RELEASE</version>
+            <type>jar</type>
+        </dependency>
+        <!-- could be omitted since included by spring-data-gemfire -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-aop</artifactId>
+            <version>3.1.0.RELEASE</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-beans</artifactId>
+            <version>3.1.0.RELEASE</version>
+            <type>jar</type>
+        </dependency>
+         <!--  -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
+            <version>3.1.0.RELEASE</version>
+        </dependency>
+        <!-- could be omitted since included by spring-data-gemfire -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-core</artifactId>
+            <version>3.1.0.RELEASE</version>
+            <type>jar</type>
+        </dependency>
+         <!--  -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-jdbc</artifactId>
+            <version>3.1.0.RELEASE</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.10</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.gemstone.gemfire</groupId>
+            <artifactId>gemfire</artifactId>
+            <version>6.6.1</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>1.2.16</version>
+        </dependency>
+        <!-- Spring Batch Dependency for loading flat files if we need it -->
+        <dependency>
+            <groupId>org.springframework.batch</groupId>
+            <artifactId>spring-batch-core</artifactId>
+            <version>2.1.8.RELEASE</version>
+        </dependency>
+        <!-- some tc Server /Apache DB connection pool so we can talk to DB for load/save -->
+        <dependency>
+            <groupId>commons-dbcp</groupId>
+            <artifactId>commons-dbcp</artifactId>
+            <version>1.3</version>
+            <classifier />
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>xerces</groupId>
+                    <artifactId>xerces</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>xerces</groupId>
+                    <artifactId>xercesImpl</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>xml-apis</groupId>
+                    <artifactId>xml-apis</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <!-- if we want to test with embedded h2 db -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <version>1.3.163</version>
+            <classifier />
+        </dependency>
+    </dependencies>
+
+    <!-- do some crazy pom hacking here to get multiple war files and single 
+        jar out one built process -->
+    <build>
+        <finalName>${project.artifactId}-${project.version}</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <!-- need to add a plugin version number here -->
+                <executions>
+                    <execution>
+                        <id>make-a-jar</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <!-- need to add a plugin version number here -->
+                <configuration>
+                    <source>1.6</source>
+                    <target>1.6</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-war-plugin</artifactId>
+                <!-- need to add a plugin version number here -->
+                <!-- general no-purpose war file - this doesn't actually 
+                    get built -->
+                <configuration>
+                    <warName>cache-demo</warName>
+                    <classifier>server</classifier>
+                    <webappDirectory>${project.build.directory}/src/main/webapp</webappDirectory>
+                    <webResources>
+                        <resource>
+                            <directory>src/main/webapp</directory>
+                        </resource>
+                    </webResources>
+                </configuration>
+                <executions>
+                    <execution>
+                        <!-- lets us deploy the Gemfire data node as a war 
+                            file -->
+                        <id>server</id>
+                        <phase>package</phase>
+                        <configuration>
+                            <warName>cache-demo</warName>
+                            <classifier>server</classifier>
+                            <webappDirectory>${project.build.directory}/src/main/webapp-server</webappDirectory>
+                            <webResources>
+                                <resource>
+                                    <directory>src/main/webapp-server</directory>
+                                </resource>
+                            </webResources>
+                        </configuration>
+                        <goals>
+                            <goal>war</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <!-- lets us deploy the Gemfire locator as a war 
+                            file -->
+                        <id>locator</id>
+                        <phase>package</phase>
+                        <configuration>
+                            <warName>cache-demo</warName>
+                            <classifier>locator</classifier>
+                            <webappDirectory>${project.build.directory}/src/main/webapp-locator</webappDirectory>
+                            <webResources>
+                                <resource>
+                                    <directory>src/main/webapp-locator</directory>
+                                </resource>
+                            </webResources>
+                        </configuration>
+                        <goals>
+                            <goal>war</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <!-- lets us deploy the Gemfire locator as a war 
+                            file -->
+                        <id>jmxagent</id>
+                        <phase>package</phase>
+                        <configuration>
+                            <warName>cache-demo</warName>
+                            <classifier>jmxagent</classifier>
+                            <webappDirectory>${project.build.directory}/src/main/webapp-jmxagent</webappDirectory>
+                            <webResources>
+                                <resource>
+                                    <directory>src/main/webapp-jmxagent</directory>
+                                </resource>
+                            </webResources>
+                        </configuration>
+                        <goals>
+                            <goal>war</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <!-- lets us deploy the client as a war file -->
+                        <id>client</id>
+                        <phase>package</phase>
+                        <configuration>
+                            <warName>cache-demo</warName>
+                            <classifier>client</classifier>
+                            <webappDirectory>${project.build.directory}/src/main/webapp-client</webappDirectory>
+                            <webResources>
+                                <resource>
+                                    <directory>src/main/webapp-client</directory>
+                                </resource>
+                            </webResources>
+                        </configuration>
+                        <goals>
+                            <goal>war</goal>
+                        </goals>
+                    </execution>
+
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+    <repositories>
+        <!-- comment these out if you can't get to the internet -->
+        <repository>
+            <id>gemfire-release-repo</id>
+            <name>GemFire Release Repository</name>
+            <url>http://dist.gemstone.com/maven/release</url>
+        </repository>
+        <repository>
+            <id>maven2</id>
+            <name>Maven2 Central</name>
+            <url>http://repo1.maven.org/maven2/</url>
+        </repository>
+        <repository>
+            <id>repository.springframework.maven.milestone</id>
+            <name>Spring Framework Maven Milestone Repository</name>
+            <url>http://maven.springframework.org/milestone</url>
+        </repository>
+        <!-- put your resources in the lib directory if you don't have access to the internet -->
+        <!-- lets us use the lib directory as a maven repo for resources we don't have access to -->
+        <repository>
+            <id>project</id>
+            <name>Project Maven Repository</name>
+            <url>file://${basedir}/lib/</url>
+        </repository>
+    </repositories>
+    <pluginRepositories>
+        <!-- lets us use the lib directory as a maven repo for resources 
+            we don't have access to -->
+        <pluginRepository>
+            <id>projectPlugins</id>
+            <name>Project Maven Repository</name>
+            <url>file://${basedir}/lib/</url>
+        </pluginRepository>
+    </pluginRepositories>
+    <artifactId>cache-demo</artifactId>
+    <name>cache-demo</name>
+</project>
