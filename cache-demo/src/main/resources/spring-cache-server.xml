@@ -142,12 +142,15 @@
     </gfe:replicated-region>
     
     <!-- demonstration for the cache annotation and the CommandPowerOfTwo command processor
-        uses dummy cache writer and loader 
+        uses dummy cache writer and loader because these are not backed by db
+        This cache is not backed by a database.  Enable statistics for expiration
+        Assume results only valid for 15 seconds from time of last modification. entry-tti is since last access
       -->
-    <gfe:replicated-region id="POWERTABLE" name="POWERTABLE" cache-ref="cache">
+    <gfe:replicated-region id="POWERTABLE" name="POWERTABLE" cache-ref="cache" statistics="true">
         <gfe:cache-listener ref="dummy-cache-listener-logger" />
-        <gfe:cache-loader   ref="automapped-cache-loader"/>
+        <gfe:cache-loader   ref="dummy-cache-loader"/>
         <gfe:cache-writer   ref="dummy-cache-writer"/>
+	    <gfe:entry-ttl timeout="15"  action="DESTROY" />
     </gfe:replicated-region>
 
     <!-- demonstration for the cache annotation and the CommandPowerOfTwo command processor -->

@@ -10,49 +10,51 @@
     <version>1.0.0</version>
     <url>http://maven.apache.org</url>
     <dependencies>
+      <!-- other interfesting components you really want that are not on maven repos -->
+      <!--
         <dependency>
-            <groupId>gfmon</groupId>
+            <groupId>gemstone</groupId>
             <artifactId>commons-modeler</artifactId>
             <version>6.6</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>gfmon</groupId>
+            <groupId>gemstone</groupId>
             <artifactId>mail</artifactId>
             <version>6.6</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>gfmon</groupId>
+            <groupId>gemstone</groupId>
             <artifactId>mx4j</artifactId>
             <version>6.6</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>gfmon</groupId>
+            <groupId>gemstone</groupId>
             <artifactId>mx4j-tools</artifactId>
             <version>6.6</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>gfsh</groupId>
+            <groupId>gemstone</groupId>
             <artifactId>gfsh</artifactId>
             <version>6.6</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>gfsh</groupId>
+            <groupId>gemstone</groupId>
             <artifactId>jline</artifactId>
             <version>6.6</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
-
+      -->
         <dependency>
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-data-gemfire</artifactId>
@@ -151,7 +153,7 @@
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
-            <version>1.3.163</version>
+            <version>1.3.164</version>
             <classifier />
         </dependency>
     </dependencies>
@@ -293,7 +295,7 @@
             <url>http://repo1.maven.org/maven2/</url>
         </repository>
         <repository>
-            <id>repository.springframework.maven.milestone</id>
+            <id>spring-maven-milestone</id>
             <name>Spring Framework Maven Milestone Repository</name>
             <url>http://maven.springframework.org/milestone</url>
         </repository>

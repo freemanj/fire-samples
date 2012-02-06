@@ -42,7 +42,8 @@ The idea here is that we wanted a simple way to muck around with Gemfire feature
 This list may not be accurate.  See the menu for the current list.
 That command line lets you do the following functions:  
 <ul>
-<li>Generate 2^n as a demo of @Cacheable.  Calculates 2^n and caches. Uses the cache version if you repeat teh same number more than once  <br>Usage: &lt;cmd&gt; &lt;n&gt;
+<li>Generate 2^n as a demo of @Cacheable.  Calculates 2^n and caches. Uses the cache version if you repeat the same number more than once.
+    Cache entries expire 15 seconds after creation.  <br>Usage: &lt;cmd&gt; &lt;n&gt;
 <li>Return Cache sizes for all regions. Clients with local caches return the local cache size   <br>Usage: &lt;cmd&gt;
 <li>Create random data and stuff into Gemfire Cluster. This creates 400,000 rows in all tables    <br>Usage: &lt;cmd&gt;
 <li>Load a region from a CSV file (absolute or relative to project root).   <br> Usage: &lt;cmd&gt; &lt;region_name&gt; &lt;csv_file_name&gt;
@@ -143,7 +144,8 @@ The gemfire regions exist to demonstrate a couple different ideas and capabiliti
     This is a very easy way to push objects into and out of a cache without knowing the cache exists. All ther
     uses of the cache in this codebase "know" about the cache. 
     The example is very simple only using a single region. Applications could share types of objects in a single region
-    or they could have one region per object type for these caches.
+    or they could have one region per object type for these caches. 
+    These tables have a 15 second TTL so entries expire 15 seconds after they are created
     <li>POWERTABLE</li>
     </ul>
 </li>  

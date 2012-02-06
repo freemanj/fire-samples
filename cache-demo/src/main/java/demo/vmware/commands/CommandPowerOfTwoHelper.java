@@ -19,7 +19,8 @@ import org.apache.log4j.Logger;
 import org.springframework.cache.annotation.Cacheable;
 
 /**
- * Implementaton of the interface. It will be coughed up by spring as a proxy if we have the cachable scanner running
+ * Implementaton of the interface. Think of this as an expensive service that we want to cache the results of. It will be coughed up
+ * by spring as a proxy if we have the cachable scanner running
  * 
  * @author freemanj
  * 
@@ -42,6 +43,13 @@ public class CommandPowerOfTwoHelper implements ICommandPowerOfTwoHelper {
         LOG.info("Not cached so calculating 2^" + targetNumber);
         hitCount++;
         Double result = Math.pow(2.0, targetNumber);
+        try {
+            // simulate long running service with 3 second delay
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+            // don't care
+        }
+
         return new Integer(result.intValue());
     }
 
