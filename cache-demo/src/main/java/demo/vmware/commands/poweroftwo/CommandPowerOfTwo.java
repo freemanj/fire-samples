@@ -13,13 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package demo.vmware.commands;
+package demo.vmware.commands.poweroftwo;
 
 import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ConfigurableApplicationContext;
+
+import demo.vmware.commands.CommandResult;
+import demo.vmware.commands.ICommand;
 
 /**
  * Calculates a power of two and caches the value using @Cacheable so it doesn't have to recalculate

@@ -48,7 +48,7 @@
     <!--  this bean lets us use one of the regions as a meta-data or properties store. It provides static api to properties -->
     <!--  could skip this definition if we added path to resource scan and then auto-injected -->
     <bean id="cacheBasedPropertiesBinder" class="demo.vmware.util.CacheBasedPropertiesBinder">
-        <property name="propertiesRegion" ref="PROPERTIES"/>
+        <property name="propertiesRegion" ref="PROPERTIES-REGION"/>
     </bean>
     
     <!--  demo cache listener so we can log to see how it works at the debug level -->
@@ -89,18 +89,6 @@
         <property name="diskStoreName" value="default" />
     </bean>
 
-    <!-- this is a future for gateway support. gateway is not functional in this demo. 
-         WAN gateway also used for write-behind support  
-         -->
-    <bean id="gatewayQueueAttributes" class="com.gemstone.gemfire.cache.util.GatewayQueueAttributes">
-        <property name="diskStoreName" value="#{diskStore.getStore().getName()}" />
-        <property name="enablePersistence" value="false" />
-        <property name="batchSize" value="1000" />
-        <property name="maximumQueueMemory" value="32" />
-    </bean>
-
-
-
     <!-- GEMFIRE REGION DEFINITIONS - Similar that that in spring-cache-client
          should declare loaders, listeners or writers only if you actually need them. They have a cost.
          note: listeners must be declared before loaders and writers 
@@ -109,33 +97,35 @@
          cache-loader: called when there is a cache miss on a get() call
          cache-writer: when a put() is called that needs to get written out somewhere like the DB
          -->
-    
-    <gfe:replicated-region id="ATTRIBUTE" name="ATTRIBUTE" cache-ref="cache">
+
+    <!-- spring-data-gemfire doesn't support WAN gateway so have to do region config in standard xml for
+        any region wanting asynch DB write behind.
+        -->
+    <gfe:replicated-region id="ATTRIBUTE-REGION" name="ATTRIBUTE" cache-ref="cache">
+        <gfe:cache-listener ref="dummy-cache-listener-logger" />
+        <gfe:cache-loader   ref="automapped-cache-loader"/>
+        <gfe:cache-writer   ref="dummy-cache-writer"/>
+    </gfe:replicated-region>
+    <gfe:replicated-region id="RELATIONSHIP-REGION"  name="RELATIONSHIP" cache-ref="cache">
         <gfe:cache-listener ref="dummy-cache-listener-logger" />
         <gfe:cache-loader   ref="automapped-cache-loader"/>
         <gfe:cache-writer   ref="dummy-cache-writer"/>
     </gfe:replicated-region>
     
-    <gfe:replicated-region id="RELATIONSHIP"  name="RELATIONSHIP" cache-ref="cache">
-        <gfe:cache-listener ref="dummy-cache-listener-logger" />
-        <gfe:cache-loader   ref="automapped-cache-loader"/>
-        <gfe:cache-writer   ref="dummy-cache-writer"/>
-    </gfe:replicated-region>
-    
-     <gfe:replicated-region id="TRANSFORM"  name="TRANSFORM" cache-ref="cache">
+     <gfe:replicated-region id="TRANSFORM-REGION"  name="TRANSFORM" cache-ref="cache">
         <gfe:cache-listener ref="dummy-cache-listener-logger" />
         <gfe:cache-loader   ref="automapped-cache-loader"/>
         <gfe:cache-writer   ref="dummy-cache-writer"/>
     </gfe:replicated-region>
     
     <!--  contacts are tied to a single company (ATTRIBUTE) so co-locate if partitioned -->
-    <gfe:replicated-region id="CONTACT"  name="CONTACT" cache-ref="cache">
+    <gfe:replicated-region id="CONTACT-REGION"  name="CONTACT" cache-ref="cache">
         <gfe:cache-listener ref="dummy-cache-listener-logger" />
         <gfe:cache-loader   ref="automapped-cache-loader"/>
         <gfe:cache-writer   ref="dummy-cache-writer"/>
     </gfe:replicated-region> 
     
-    <gfe:replicated-region id="ACTIVITYLEGAL" name="ACTIVITYLEGAL" cache-ref="cache">
+    <gfe:replicated-region id="ACTIVITYLEGAL-REGION" name="ACTIVITYLEGAL" cache-ref="cache">
         <gfe:cache-listener ref="dummy-cache-listener-logger" />
         <gfe:cache-loader   ref="automapped-cache-loader"/>
         <gfe:cache-writer   ref="dummy-cache-writer"/>
@@ -146,7 +136,7 @@
         This cache is not backed by a database.  Enable statistics for expiration
         Assume results only valid for 15 seconds from time of last modification. entry-tti is since last access
       -->
-    <gfe:replicated-region id="POWERTABLE" name="POWERTABLE" cache-ref="cache" statistics="true">
+    <gfe:replicated-region id="POWERTABLE-REGION" name="POWERTABLE" cache-ref="cache" statistics="true">
         <gfe:cache-listener ref="dummy-cache-listener-logger" />
         <gfe:cache-loader   ref="dummy-cache-loader"/>
         <gfe:cache-writer   ref="dummy-cache-writer"/>
@@ -154,17 +144,20 @@
     </gfe:replicated-region>
 
     <!-- demonstration for the cache annotation and the CommandPowerOfTwo command processor -->
-    <gfe:replicated-region id="PROPERTIES" name="PROPERTIES" cache-ref="cache">
+    <gfe:replicated-region id="PROPERTIES-REGION" name="PROPERTIES" cache-ref="cache">
     </gfe:replicated-region>
 
     <!-- this is a demonstration region that shows how to configure disk persistence 
          no model objects or commands work for this region at this time
          -->
-    <gfe:replicated-region id="NOTES" name="NOTES" cache-ref="cache">
+    <gfe:replicated-region id="NOTES-REGION-ON-DISK" name="NOTES-ON-DISK" cache-ref="cache">
         <gfe:disk-store queue-size="50" auto-compact="true" max-oplog-size="10" synchronous-write="false" time-interval="9999">
             <gfe:disk-dir location="#{findDiskDir.createDirectory('activitylegal-persist')}" max-size="999" />
         </gfe:disk-store>
     </gfe:replicated-region>
+
+    <!-- this demonstration region shows how we can create a spring bean from a region configured in an external xml file -->
+    <gfe:lookup-region id="NOTES-REGION-IN-DB" name="NOTES-EXT-CONFIG" cache-ref="cache"/>
 
     <!-- create some indexes. 
          The 'expression' is attribute.attribute off the root object put into the region 

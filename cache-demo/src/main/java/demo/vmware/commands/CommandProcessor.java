@@ -15,9 +15,11 @@
  */
 package demo.vmware.commands;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -73,6 +75,8 @@ public class CommandProcessor implements ICommandProcessor {
         return menuStrings;
     }
 
+    public static final Pattern UGLY_PARSING_PATTERN = Pattern.compile("\".*?(?<!\\\\)\"|'.*?(?<!\\\\)'|[A-Za-z0-9']+");
+
     /**
      * Command dispatch loop invokes the appropriate spring wired command
      * 
@@ -83,13 +87,15 @@ public class CommandProcessor implements ICommandProcessor {
         while (true) {
             CommandResult results;
             printMenuListToStdOut();
-            Scanner s = new Scanner(System.in);
-            int choice = s.nextInt();
+            Scanner s = createScanner(System.in);
+
+            String fixedChoice = getNextToken(s);
+            int choice = Integer.parseInt(fixedChoice);
             List<String> parameters = new ArrayList<String>();
             // TODO should have validateChoice() method
             if (choice >= 0 && choice < commands.size()) {
                 while (parameters.size() < commands.get(choice).numberOfParameters()) {
-                    parameters.add(s.next());
+                    parameters.add(getNextToken(s));
                 }
             }
             try {
@@ -103,6 +109,26 @@ public class CommandProcessor implements ICommandProcessor {
                 System.out.println(oneMessage);
             }
         }
+    }
+
+    /**
+     * 
+     * @param s
+     * @return next token that could have been quoted string with quotes removed
+     */
+    String getNextToken(Scanner s) {
+        return s.findInLine(UGLY_PARSING_PATTERN).replace("\"", "");
+    }
+
+    /**
+     * protected so we can unit test
+     * 
+     */
+    Scanner createScanner(InputStream source) {
+        // add support for quoted strings
+        Scanner s = new Scanner(source);
+        s.useDelimiter(UGLY_PARSING_PATTERN);
+        return s;
     }
 
     /**

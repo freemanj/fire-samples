@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" 
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xmlns:gfe="http://www.springframework.org/schema/gemfire"
+        xmlns:context="http://www.springframework.org/schema/context" 
+        xmlns:util="http://www.springframework.org/schema/util" 
+        xmlns:p="http://www.springframework.org/schema/p"
+        xmlns:cache="http://www.springframework.org/schema/cache" 
+        xmlns:jaxws="http://cxf.apache.org/jaxws"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+        http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache-3.1.xsd
+        http://www.springframework.org/schema/gemfire http://www.springframework.org/schema/gemfire/spring-gemfire-1.1.xsd
+        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd
+        http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd"
+    >
+
+    <!-- Generic properties that we can set, such as where to store data and log files -->
+    <context:property-placeholder system-properties-mode="OVERRIDE" location="classpath:/common.properties" />
+    
+    <!-- gemfire.properties file for the cache server -->
+    <bean id="props" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+        <property name="locations">
+            <list>
+                <value>classpath:gemfire-server.properties</value>
+            </list>
+        </property>
+        <property name="properties">
+            <value>
+                locators=${locator.host1}[${locator.port1}],${locator.host2}[${locator.port2}]
+                log-file=#{findDiskDir.getSelected().getPath().replaceAll('\\','\\\\')}/gemfire.log
+                statistic-archive-file=#{findDiskDir.getSelected().getPath().replaceAll('\\','\\\\')}/gemfire.gfs
+            </value>
+        </property>
+    </bean>
+
+    <!--  we could refacter spring-cache-server.xml to pull out the re-used components and import that xml here -->
+    
+    <!-- when we run multiple cache servers on the same node, we need unique server ports -->
+    <bean id="portGenerator" class="demo.vmware.util.ServerPortGenerator" />
+
+    <!-- create a unique directory base directory for this node -->
+    <bean id="findDiskDir" class="demo.vmware.util.PersistenceDirectoryGenerator" destroy-method="unlock" init-method="findDirectory">
+        <property name="parent" value="${data.location}" />
+    </bean>
+
+    <!-- gemfire base cache configuration loads part of the config from the standard gemfire (6.6) style xml -->
+    <gfe:cache id="cache" properties-ref="props" cache-xml-location="classpath:cache-gateway-writebehind.xml" />
+
+    <!-- this makes the cache server be a 'server' in the grid -->
+    <gfe:cache-server id="advanced-config" auto-startup="true" cache-ref="cache" port="#{portGenerator.generatePort()}" />
+     
+    
+</beans>

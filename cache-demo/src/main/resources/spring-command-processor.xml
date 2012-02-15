@@ -63,14 +63,16 @@
     <bean id="commandPurgeAllRegions" class="demo.vmware.commands.CommandPurgeAllRegions"/>
     <bean id="commandSetProperty" class="demo.vmware.commands.CommandSetProperty"/>
     <bean id="commandSystemExit" class="demo.vmware.commands.CommandSystemExit"/>
-    <bean id="commandPowerOfTwo" class="demo.vmware.commands.CommandPowerOfTwo"/>
+    <bean id="commandAddNote" class="demo.vmware.commands.notes.CommandAddNote"/>
+    <bean id="commandPowerOfTwo" class="demo.vmware.commands.poweroftwo.CommandPowerOfTwo"/>
     <!--  this lets us wrap this class in a proxy it is autowired into CommandPowerOfTwo -->
-    <bean class="demo.vmware.commands.CommandPowerOfTwoHelper"/>
+    <bean class="demo.vmware.commands.poweroftwo.CommandPowerOfTwoHelper"/>
 
     <!--  manually build the list so we can control the display order -->
     <bean id="defaultCommandProcessor" class="demo.vmware.commands.CommandProcessor"> 
         <constructor-arg>
             <list>
+                <ref bean="commandAddNote"/>
                 <ref bean="commandPowerOfTwo"/>
                 <ref bean="commandGetCounts"/>
                 <ref bean="commandCreateData"/>

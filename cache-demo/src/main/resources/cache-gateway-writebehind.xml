@@ -1,0 +1,39 @@
+<!DOCTYPE cache PUBLIC 
+"-//GemStone Systems, Inc.//GemFire Declarative Caching 6.6//EN" 
+"http://www.gemstone.com/dtd/cache6_6.dtd">
+
+<!-- This cache config sets up a non-retaining wan gateway for the purposes 
+    of hooking up a write-behind listener -->
+<!-- GatewayEventListener that performs (fake) write-behind work -->
+<cache>
+    <gateway-hub id="DB">
+        <gateway id="WRITE-BEHIND-DB">
+            <gateway-listener>
+                <class-name>demo.vmware.datasync.DummyGatewayEventListener</class-name>
+            </gateway-listener>
+            <!-- 10 seconds limit that can elapse between sending batches 
+                of up to 1000 -->
+            <gateway-queue batch-size="5000"
+                batch-time-interval="10000" />
+        </gateway>
+    </gateway-hub>
+
+    <pdx read-serialized="true">
+        <pdx-serializer>
+            <class-name>com.gemstone.gemfire.pdx.ReflectionBasedAutoSerializer</class-name>
+            <parameter name="classes">
+                <string>demo\.vmware\.domain\..*</string>
+            </parameter>
+        </pdx-serializer>
+    </pdx>
+
+    <!-- Enable gateway queueing for the region(s) where I need write-behind -->
+    <region name="NOTES-EXT-CONFIG" >
+        <region-attributes data-policy="empty" scope="distributed-ack" enable-gateway="true"> 
+        <subscription-attributes interest-policy="all"/> 
+        </region-attributes> 
+    </region>
+ 
+ 
+</cache>
+

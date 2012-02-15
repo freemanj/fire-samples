@@ -20,15 +20,15 @@
          this is because we don't retrieve values from all regions with spring gemfire
          -->
     <bean id="gemTemplateAttribute" name="gemAttribute" 
-        class="org.springframework.data.gemfire.GemfireTemplate" p:region-ref="ATTRIBUTE"/>
+        class="org.springframework.data.gemfire.GemfireTemplate" p:region-ref="ATTRIBUTE-REGION"/>
     <bean id="gemTemplateTransform" name="gemTransform" 
-        class="org.springframework.data.gemfire.GemfireTemplate" p:region-ref="TRANSFORM"/>
+        class="org.springframework.data.gemfire.GemfireTemplate" p:region-ref="TRANSFORM-REGION"/>
     <bean id="gemTemplateRelationship" name="gemRelationship" 
-        class="org.springframework.data.gemfire.GemfireTemplate" p:region-ref="RELATIONSHIP" />
+        class="org.springframework.data.gemfire.GemfireTemplate" p:region-ref="RELATIONSHIP-REGION" />
     <bean id="gemTemplateContact" name="gemContact" 
-        class="org.springframework.data.gemfire.GemfireTemplate" p:region-ref="CONTACT" />
+        class="org.springframework.data.gemfire.GemfireTemplate" p:region-ref="CONTACT-REGION" />
     <bean id="gemTemplateActivityLegal" name="gemActivityLegal" 
-        class="org.springframework.data.gemfire.GemfireTemplate" p:region-ref="ACTIVITYLEGAL" />
+        class="org.springframework.data.gemfire.GemfireTemplate" p:region-ref="ACTIVITYLEGAL-REGION" />
     
 </beans>
     

@@ -23,28 +23,31 @@
 
     <!-- GEMFIRE REGION DEFINITIONS - similar to that in spring-cache-server -->
     <!--  demonstrates the us of optional listeners avaialble on the client side -->   
-    <gfe:client-region id="ATTRIBUTE" pool-name="client" cache-ref="cache" >
+    <gfe:client-region id="ATTRIBUTE-REGION" name="ATTRIBUTE" pool-name="client" cache-ref="cache" >
         <gfe:cache-listener ref="dummy-cache-listener-logger" />
     </gfe:client-region>
-    <gfe:client-region id="TRANSFORM" pool-name="client" cache-ref="cache" >    
+    <gfe:client-region id="TRANSFORM-REGION" name="TRANSFORM" pool-name="client" cache-ref="cache" >    
          <gfe:cache-listener ref="dummy-cache-listener-logger" />
     </gfe:client-region>
-    <gfe:client-region id="RELATIONSHIP" pool-name="client" cache-ref="cache" >
+    <gfe:client-region id="RELATIONSHIP-REGION" name="RELATIONSHIP" pool-name="client" cache-ref="cache" >
          <gfe:cache-listener ref="dummy-cache-listener-logger" />
     </gfe:client-region>
-    <gfe:client-region id="CONTACT" pool-name="client" cache-ref="cache" >
+    <gfe:client-region id="CONTACT-REGION" ame="CONTACT" pool-name="client" cache-ref="cache" >
          <gfe:cache-listener ref="dummy-cache-listener-logger" />
     </gfe:client-region>
-    <gfe:client-region id="ACTIVITYLEGAL" pool-name="client" cache-ref="cache" >
+    <gfe:client-region id="ACTIVITYLEGAL-REGION" name="ACTIVITYLEGAL" pool-name="client" cache-ref="cache" >
          <gfe:cache-listener ref="dummy-cache-listener-logger" />
     </gfe:client-region>
     <!-- holds the @Cacheable stored values for CommandPowerOfTwo(Helper) -->
-    <gfe:client-region id="POWERTABLE" pool-name="client" cache-ref="cache" >
+    <gfe:client-region id="POWERTABLE-REGION" name="POWERTABLE" pool-name="client" cache-ref="cache" >
          <gfe:cache-listener ref="dummy-cache-listener-logger" />
     </gfe:client-region>
     <!-- holds the cache properties / meta-data to support enable/disbable custom code -->
-        <gfe:client-region id="PROPERTIES" pool-name="client" cache-ref="cache" >
+        <gfe:client-region id="PROPERTIES-REGION" name="Properties" pool-name="client" cache-ref="cache" >
     </gfe:client-region>
+
+    <!-- this demonstration region shows how we can create a spring bean from a region configured in an external xml file -->
+    <gfe:lookup-region id="NOTES-REGION-IN-DB" name="NOTES-EXT-CONFIG" cache-ref="cache"/>
 
     <!--  support for the spring cache abstracton in the server when running server side code -->
     <!--  this file dependent on the gemfire cache being spring wired using spring-gemfire -->

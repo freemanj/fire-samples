@@ -12,4 +12,16 @@
         </pdx-serializer>
     </pdx>
 
+    <!--  spring gemfire doesn't support enable gateway as of 2/2012 so we have to define cache regions here 
+          all cache definitions must enable gateway even if these aren't gateway nodes
+          -->
+    <!-- Enable gateway write-behind for the region(s) where I need write-behind 
+         note that I don't use any listeners here.  I could have added them but currently
+         only demonstrate listeners as spring wired entities in the spring-cache-*.xml files
+         -->
+    <region name="NOTES-EXT-CONFIG" >
+        <region-attributes  scope="distributed-ack" enable-gateway="true"> 
+        </region-attributes> 
+    </region>
+
 </cache>

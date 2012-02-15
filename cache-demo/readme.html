@@ -17,7 +17,8 @@ The following is an incomplete list of demonstrated components.
 <li><b>Cache Writer (write-through)</b> Two examples, one that just logs when data changes in the cache and can be written some backend system. The other is configured to write to a DB when data is saved.</li>
 <li><b>Locator</b> A locator process that shows how the ports are selected</li>
 <li><b>JmxAgent</b> A JMXAgent wrapper that lets it be run in the same way as the other components.</li>
-<li><b>Disk persistence(?)</b> this may belong in a different section</li>
+<li><b>Disk write-through persistence(?)</b> this may belong in a different section</li>
+<li><b>Disk write-behind</b> hooks demonstrated via WAN gateway</li>
 <li><b>The @ cacheable annotation</b> One of the commands and regions is dedicated the @cacheable annotation. See the "power" command</li>
 <li><b></b> </li>
 </ul>
@@ -25,7 +26,7 @@ The following is an incomplete list of demonstrated components.
 Some things that are not yet in the demonstration
 <ul>
 <li><b>WAN Gateway</b> TBA</li>
-<li><b>Write-behind</b> This is built on top of WAN gateway</li>
+<li><b>Write-behind</b> This is built on top of WAN gateway. The demonstration includes logging</li>
 <li><b>Write-through</b> The demonstration includes logging write-through. It will eventually have fully functional write-through </li>
 <li><b>Partitioned regions</b> This requires that users run at least two nodes to be useful.</li>
 <li><b>Co-located data</b> This is whose node location is picked based on its relationship to other data.  All regions are currently fully replicated without any partioning </li>
@@ -42,6 +43,7 @@ The idea here is that we wanted a simple way to muck around with Gemfire feature
 This list may not be accurate.  See the menu for the current list.
 That command line lets you do the following functions:  
 <ul>
+<li>Save a note to the notes table.  Saves a command line note to the NOTES-EXT-CONFIG table which is hooked to an asynchronous listener via the WAN gateway<br>Usage: &lt;cmd&gt; &lt;double quoted message&gt;
 <li>Generate 2^n as a demo of @Cacheable.  Calculates 2^n and caches. Uses the cache version if you repeat the same number more than once.
     Cache entries expire 15 seconds after creation.  <br>Usage: &lt;cmd&gt; &lt;n&gt;
 <li>Return Cache sizes for all regions. Clients with local caches return the local cache size   <br>Usage: &lt;cmd&gt;
@@ -72,11 +74,14 @@ This code supports an arbitrary number of locators per machine but is currently 
 <li><b>Server.java</b> Run this to start a Gemfire server process. You can run multiple copies of this on the same machine.
 The caches are configured through spring so you can convert the regions from simple replicated to partitioned though those files. 
 The demo command menu is available in this process type.
-<li><b>JmxAgent.</b> GFMon, the Gemfire monitoring tool, communicates with a cluster via JMX.This program starts the gemfire/jmx bridge.  Run this agent before running gfmon. 
-<li><b>Client.</b> Clients can be standalone or caching clients.  This is a caching client that runs the same command menu as the server.
+<li><b>JmxAgent.java</b> GFMon, the Gemfire monitoring tool, communicates with a cluster via JMX.This program starts the gemfire/jmx bridge.  Run this agent before running gfmon. 
+<li><b>Client.java</b> Clients can be standalone or caching clients.  This is a caching client that runs the same command menu as the server.
 Clients should be launched after all the server and services components have been started.
-<li><b>ClientCq</b> This is a standalone non-caching client that registers a continuous query for data changes of a certain type.
+<li><b>ClientCq.java</b> This is a standalone non-caching client that registers a continuous query for data changes of a certain type.
 Clients should be launched after all the server and services components have been started.
+<li><b>WanGatewayWritebehind.java</b> This runs a WAN gateway process that records all data that would either be written to a database
+as database write-behind or data that would be replicated across the WAN gateway to another data center.  
+Only the NOTES-EXT-CONFIG region is currently configured for this so you must use the "add a note" command in a server or client to insert data that is sent to this process.
 </ul> 
 
 Server, Client, Locator and JmxAgent can also be run inside container using the separate war files defined in src/main/resources. 
@@ -108,6 +113,9 @@ Logging level changes require a restart to be picked up.
 <li>Pull down the content of one of the regions using the command console and have it print a couple objects using the command options.
 <li>Start a continuous query (cq) client.  
 <li>Modify one of the objects that is being monitored by the cq client and you should see it log the fact that it got a callback.
+<li>Start the wan gateway write-behind process.
+<li>Create a note using the note command on a server (or client).  Double quote the notes string to include spaces.
+<li>Watch the logs on the WAN gateway to see the gateway pick up the created note.
 </ol>
 
 The cache listener and partitioning behavior can be changed via the files in the src/main/resources directory.  
@@ -149,6 +157,14 @@ The gemfire regions exist to demonstrate a couple different ideas and capabiliti
     <li>POWERTABLE</li>
     </ul>
 </li>  
+<li>Regions supporting write-behind activities
+    <ul>
+    This region is hooked configured in the WAN gateway so that any notes saved to it are asynchronously logged.  
+    This shows where database persistense code would go if you wanted to do database write-behind.  The timeouts
+    and batch sizes for the WAN gateway are configured in their XML file.
+    <li>NOTES-EXT-CONFIG</li>
+    </ul>
+</li>
 <li>Regions for future demonstrations.
     <ul>
     Other regions exist in the config to show alternate cache configurations including disk-persistent or partitioned regions.
@@ -161,7 +177,8 @@ The gemfire regions exist to demonstrate a couple different ideas and capabiliti
 Data model objects exist for the Data Model Regions. They all have single attribute keys.  
 This isn't a requirement but simplifies the demonstration.
 <p>
-Arbitrary, not necessarily uniform, or primitive data is stored in the other regions.
+Arbitrary, not necessarily uniform, or primitive data is stored in the other regions.  
+Properties only include strings in the demo but they could be arbitrary property model objects.
 
 <h2>Auto-mapping data and file interaction</h2>
 To be written
