@@ -19,12 +19,12 @@ public class CommandProcessorTest {
         CommandProcessor jig = new CommandProcessor(null);
         // can't be null since it's a constructor
         assertNotNull(jig);
-        InputStream stream = new ByteArrayInputStream("0 cow \"my dog\" cat".getBytes());
+        InputStream stream = new ByteArrayInputStream("0 cow \"my dog\" cat a-file_name.fake.xml".getBytes());
         Scanner scanJig = jig.createScanner(stream);
-        String token;
         assertEquals("0", jig.getNextToken(scanJig));
         assertEquals("cow", jig.getNextToken(scanJig));
         assertEquals("my dog", jig.getNextToken(scanJig));
         assertEquals("cat", jig.getNextToken(scanJig));
+        assertEquals("a-file_name.fake.xml", jig.getNextToken(scanJig));
     }
 }

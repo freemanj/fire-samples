@@ -75,7 +75,8 @@ public class CommandProcessor implements ICommandProcessor {
         return menuStrings;
     }
 
-    public static final Pattern UGLY_PARSING_PATTERN = Pattern.compile("\".*?(?<!\\\\)\"|'.*?(?<!\\\\)'|[A-Za-z0-9']+");
+    public static final Pattern UGLY_PARSING_PATTERN = Pattern
+            .compile("\".*?(?<!\\\\)\"|'.*?(?<!\\\\)'|[A-Za-z0-9-_.']+");
 
     /**
      * Command dispatch loop invokes the appropriate spring wired command
