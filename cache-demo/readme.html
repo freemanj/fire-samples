@@ -3,13 +3,30 @@
 <title>Gemfire Example README</title>
 </head>
 <body>
+Gemfire, and the applications that use it are made up of serveral components. There is the data caching tier itself
+that can exist as one or more data nodes.  The data tier can be extended to provide database write-behind, write-through
+and on-demand read-through.  The data tier can also be replicated to remote data clusters through the WAN gateway. 
+WAN replication is not currently part of this code base.  There is also a client tier that can be pure client or client with 
+local caching.  Client applications can consume data as they wood a database or they can register for 
+data change notifications with the appropriate callback handlers.  Gemfire relies on or can make use of other components 
+including the Gemfire locator and JMXAgent. Gemfire clusters will almost always be be coordinated and linked through
+the use of Gemfire locator processes.  JMXAgents add JMX bean access to a gemfire cluster for management and
+monitoring through either GFMon or some other JMX monitoring tool.
+<p>
+Gemfire is a set of Java programs or modules.
+Gemfire components can be run in as standalone programs using the scripts included with the Gemfire product download or they
+can be run as part of some other executable. This demonstration provides support for running all of the PoC/demonstration
+components as part of custom java main() executable or as via a WAR file.  The java main() programs provide
+a simple testing framework for running inside Eclipse. The WAR files provide a method of deploying Gemfire components
+in environments where all Java programs must run from inside a Java Servlet or J2EE container.
+
 <h1>Functionality</h1>
 This is a very basic demo of some of VMWare's Gemfire product.  
 It is demonstrable as both standalone components and as deployable war files.  
 The following is an incomplete list of demonstrated components.
 <ul>
-<li><b>Cache nodes</b> A standalone server or clustered server that includes listeners and continuous queries </li>
-<li><b>replicated regions</b> regions where the data is replicated across all nodes</li>
+<li><b>Cache nodes</b> A standalone data server or clustered server that includes listeners and continuous queries </li>
+<li><b>Replicated regions</b> Gemfire regions where the data is replicated across all nodes</li>
 <li><b>Cache client</b> A standalone client program that has local cache</li>
 <li><b>Continuous Query Clients</b> A standalone client program that receives call backs when data changes in certain regions</li>
 <li><b>Cache Listener</b> A component that runs in the server that logs listener events</li>
@@ -19,7 +36,7 @@ The following is an incomplete list of demonstrated components.
 <li><b>JmxAgent</b> A JMXAgent wrapper that lets it be run in the same way as the other components.</li>
 <li><b>Disk write-through persistence(?)</b> this may belong in a different section</li>
 <li><b>Disk write-behind</b> hooks demonstrated via WAN gateway</li>
-<li><b>The @ cacheable annotation</b> One of the commands and regions is dedicated the @cacheable annotation. See the "power" command</li>
+<li><b>The @cacheable annotation</b> One of the commands and regions is dedicated the @cacheable annotation. See the "power" command</li>
 <li><b></b> </li>
 </ul>
 <p>
@@ -40,7 +57,7 @@ Some things that are not yet in the demonstration
 <h2>Shell</h2>
 The demo has a lightweight menu system available on stdin/stdout/log4j when running as standalone applications. The commands are available in client or server processes. 
 The idea here is that we wanted a simple way to muck around with Gemfire features without building your own application. 
-This list may not be accurate.  See the menu for the current list.
+This list in this document may not always be up to date.  See the menu in the individual programs for the current list of available commands.
 That command line lets you do the following functions:  
 <ul>
 <li>Save a note to the notes table.  Saves a command line note to the NOTES-EXT-CONFIG table which is hooked to an asynchronous listener via the WAN gateway<br>Usage: &lt;cmd&gt; &lt;double quoted message&gt;

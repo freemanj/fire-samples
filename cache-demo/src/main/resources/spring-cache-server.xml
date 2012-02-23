@@ -152,11 +152,14 @@
          -->
     <gfe:replicated-region id="NOTES-REGION-ON-DISK" name="NOTES-ON-DISK" cache-ref="cache">
         <gfe:disk-store queue-size="50" auto-compact="true" max-oplog-size="10" synchronous-write="false" time-interval="9999">
-            <gfe:disk-dir location="#{findDiskDir.createDirectory('activitylegal-persist')}" max-size="999" />
+            <gfe:disk-dir location="#{findDiskDir.createDirectory('notes-persist')}" max-size="999" />
         </gfe:disk-store>
     </gfe:replicated-region>
 
-    <!-- this demonstration region shows how we can create a spring bean from a region configured in an external xml file -->
+    <!-- this demonstration region shows how we can create a spring bean from a region configured in an external xml file
+        The "add note" command adds notes to this region.  The note gets inserted and then picked up later by
+        the wan gateway if it is running. 
+        -->
     <gfe:lookup-region id="NOTES-REGION-IN-DB" name="NOTES-EXT-CONFIG" cache-ref="cache"/>
 
     <!-- create some indexes. 

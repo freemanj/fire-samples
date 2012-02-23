@@ -203,8 +203,7 @@
                 </configuration>
                 <executions>
                     <execution>
-                        <!-- lets us deploy the Gemfire data node as a war 
-                            file -->
+                        <!-- lets us deploy the Gemfire data node as a war file -->
                         <id>server</id>
                         <phase>package</phase>
                         <configuration>
@@ -222,8 +221,7 @@
                         </goals>
                     </execution>
                     <execution>
-                        <!-- lets us deploy the Gemfire locator as a war 
-                            file -->
+                        <!-- lets us deploy the Gemfire locator as a war file -->
                         <id>locator</id>
                         <phase>package</phase>
                         <configuration>
@@ -241,8 +239,7 @@
                         </goals>
                     </execution>
                     <execution>
-                        <!-- lets us deploy the Gemfire locator as a war 
-                            file -->
+                        <!-- lets us deploy the Gemfire locator as a war file -->
                         <id>jmxagent</id>
                         <phase>package</phase>
                         <configuration>
@@ -270,6 +267,24 @@
                             <webResources>
                                 <resource>
                                     <directory>src/main/webapp-client</directory>
+                                </resource>
+                            </webResources>
+                        </configuration>
+                        <goals>
+                            <goal>war</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <!-- lets us deploy the Gemfire WAN gateway with writebehind as a war file -->
+                        <id>wan-gateway-writebehind</id>
+                        <phase>package</phase>
+                        <configuration>
+                            <warName>cache-demo</warName>
+                            <classifier>gateway-writebehind</classifier>
+                            <webappDirectory>${project.build.directory}/src/main/webapp-gateway-writebehind</webappDirectory>
+                            <webResources>
+                                <resource>
+                                    <directory>src/main/webapp-gateway-writebehind</directory>
                                 </resource>
                             </webResources>
                         </configuration>
