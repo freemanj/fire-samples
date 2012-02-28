@@ -19,7 +19,7 @@
     <!-- this just contains a sample continuous query configuration for a client.  It relies on spring-cache-client-core.xmls -->
    
     <!--  inject Gemfire listeners -->
-    <gfe:cq-listener-container>
+    <gfe:cq-listener-container cache="cache">
         <!-- default handle method with the default signature specified here as an example -->
         <!-- other methods can be specified with extra parameters.  See EventDelegate for info on that mapping -->
         <!-- we create contacts as  -->

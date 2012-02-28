@@ -32,7 +32,7 @@
     <gfe:client-region id="RELATIONSHIP-REGION" name="RELATIONSHIP" pool-name="client" cache-ref="cache" >
          <gfe:cache-listener ref="dummy-cache-listener-logger" />
     </gfe:client-region>
-    <gfe:client-region id="CONTACT-REGION" ame="CONTACT" pool-name="client" cache-ref="cache" >
+    <gfe:client-region id="CONTACT-REGION" name="CONTACT" pool-name="client" cache-ref="cache" >
          <gfe:cache-listener ref="dummy-cache-listener-logger" />
     </gfe:client-region>
     <gfe:client-region id="ACTIVITYLEGAL-REGION" name="ACTIVITYLEGAL" pool-name="client" cache-ref="cache" >
@@ -43,11 +43,12 @@
          <gfe:cache-listener ref="dummy-cache-listener-logger" />
     </gfe:client-region>
     <!-- holds the cache properties / meta-data to support enable/disbable custom code -->
-        <gfe:client-region id="PROPERTIES-REGION" name="Properties" pool-name="client" cache-ref="cache" >
+    <gfe:client-region id="PROPERTIES-REGION" name="PROPERTIES" pool-name="client" cache-ref="cache" >
     </gfe:client-region>
 
     <!-- this demonstration region shows how we can create a spring bean from a region configured in an external xml file -->
-    <gfe:lookup-region id="NOTES-REGION-IN-DB" name="NOTES-EXT-CONFIG" cache-ref="cache"/>
+    <gfe:client-region id="NOTES-REGION-IN-DB" name="NOTES-EXT-CONFIG" cache-ref="cache">
+    </gfe:client-region>
 
     <!--  support for the spring cache abstracton in the server when running server side code -->
     <!--  this file dependent on the gemfire cache being spring wired using spring-gemfire -->
@@ -56,7 +57,7 @@
    
        <!--  could skip this definition if we added path to resource scan and then auto-injected -->
     <bean id="cacheBasedPropertiesBinder" class="demo.vmware.util.CacheBasedPropertiesBinder">
-        <property name="propertiesRegion" ref="PROPERTIES"/>
+        <property name="propertiesRegion" ref="PROPERTIES-REGION"/>
     </bean>
    
 </beans>

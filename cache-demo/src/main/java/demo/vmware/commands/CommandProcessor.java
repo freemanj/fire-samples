@@ -96,7 +96,13 @@ public class CommandProcessor implements ICommandProcessor {
             // TODO should have validateChoice() method
             if (choice >= 0 && choice < commands.size()) {
                 while (parameters.size() < commands.get(choice).numberOfParameters()) {
-                    parameters.add(getNextToken(s));
+                    String nextToken = getNextToken(s);
+                    if (nextToken != null) {
+                        parameters.add(nextToken);
+                    } else {
+                        LOG.error("Not enough parameters entered on command " + choice);
+                        break;
+                    }
                 }
             }
             try {
@@ -118,7 +124,12 @@ public class CommandProcessor implements ICommandProcessor {
      * @return next token that could have been quoted string with quotes removed
      */
     String getNextToken(Scanner s) {
-        return s.findInLine(UGLY_PARSING_PATTERN).replace("\"", "");
+        String nextToken = s.findInLine(UGLY_PARSING_PATTERN);
+        if (nextToken == null) {
+            return nextToken;
+        } else {
+            return nextToken.replace("\"", "");
+        }
     }
 
     /**
@@ -143,7 +154,12 @@ public class CommandProcessor implements ICommandProcessor {
     protected CommandResult forwardCommand(ConfigurableApplicationContext mainContext, int choice,
             List<String> parameters) {
         if (choice >= 0 && choice < commands.size()) {
-            return commands.get(choice).run(mainContext, parameters);
+            ICommand oneCommand = commands.get(choice);
+            if (oneCommand.numberOfParameters() == parameters.size()) {
+                return oneCommand.run(mainContext, parameters);
+            } else {
+                return new CommandResult(null, "Incorrect number of parameters for: " + choice);
+            }
         } else {
             return new CommandResult(null, "Unrecognized command: " + choice);
         }
